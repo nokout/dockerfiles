@@ -13,10 +13,9 @@
 #
 #	# Build atom image
 #	docker build -t atom .
-#
-#	docker run -v /tmp/.X11-unix:/tmp/.X11-unix \
-#		-e DISPLAY=unix$DISPLAY atom
-#
+#	docker run -d --user $UID -v /home/$USER/:/home/$USER/ -v /:/host_root/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY --workdir=/host_root/$(pwd) atom
+#	debug... docker run -it --entrypoint=/bin/bash --user $UID  -v /home/$USER/:/home/$USER/ -v /:/host_root/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY --workdir=/host_root/$(pwd) atom
+
 
 # Base docker image
 FROM debian:stretch
@@ -56,6 +55,10 @@ RUN buildDeps=' \
 	&& dpkg -i /tmp/atom-amd64.deb \
 	&& rm -rf /tmp/*.deb \
 	&& apt-get purge -y --auto-remove $buildDeps
+
+RUN useradd -ms /bin/bash nokout
+USER nokout
+WORKDIR /home/nokout
 
 # Autorun atom
 ENTRYPOINT [ "atom", "--foreground" ]
